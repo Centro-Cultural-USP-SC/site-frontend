@@ -31,6 +31,9 @@ services:
   backend:
     build: ./backend
 
+    volumes:
+      - uploads:/app/uploads
+
     restart: unless-stopped
 
     ports:
@@ -78,3 +81,6 @@ services:
 volumes:
   pgdata:
     name: centro-cultural-pgdata
+  
+  uploads:
+    name: centro-cultural-uploads

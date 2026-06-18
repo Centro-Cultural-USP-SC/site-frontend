@@ -9,6 +9,8 @@ class PostController {
         slug,
         summary,
         content,
+        category,
+        coverImage,
         published,
       } = req.body;
 
@@ -17,6 +19,8 @@ class PostController {
         slug,
         summary,
         content,
+        category,
+        coverImage,
         published,
         authorId:  (req as any).user.userId,
       });
@@ -54,7 +58,6 @@ class PostController {
   async update(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      console.log("UPDATE HIT", req.params.id, req.body);
       const post = await postService.update(id, req.body);
       
       return res.json(post);
@@ -68,7 +71,6 @@ class PostController {
   async delete(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      console.log("DELETE HIT", req.params.id);
       await postService.delete(id);
 
       return res.json({ message: "Post deleted" });
@@ -78,6 +80,18 @@ class PostController {
       });
     }
 
+  }
+
+  async getExposicoes(req: Request, res: Response) {
+    const posts = await postService.getExposicoes();
+
+    return res.json(posts);
+  }
+
+  async getAcervo(req: Request, res: Response) {
+    const posts = await postService.getAcervo();
+
+    return res.json(posts);
   }
 
 }

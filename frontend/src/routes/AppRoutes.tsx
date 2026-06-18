@@ -4,6 +4,9 @@ import Home from "../pages/Home";
 import Post from "../pages/Post";
 import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
+import Programacao from "../pages/Programacao";
+import Exposicoes from "../pages/Exposicoes";
+import Acervo from "../pages/Acervo";
 
 function PrivateRoute({ children }: any) {
   const token = localStorage.getItem("token");
@@ -29,6 +32,21 @@ export default function AppRoutes() {
               <Dashboard />
             </PrivateRoute>
           }
+        />
+
+        <Route
+          path="/programacao"
+          element={<Programacao />}
+        />
+
+        <Route
+          path="/exposicoes"
+          element={<Exposicoes />}
+        />
+
+        <Route
+          path="/acervo"
+          element={<Acervo />}
         />
 
       </Routes>

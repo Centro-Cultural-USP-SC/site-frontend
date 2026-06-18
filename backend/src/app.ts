@@ -3,6 +3,9 @@ import healthRoutes from "./routes/health.routes";
 import authRoutes from "./routes/auth.routes";
 import adminRoutes from "./routes/admin.routes";
 import postRoutes from "./routes/post.routes";
+import eventRoutes from "./routes/event.routes";
+import uploadRoutes from "./routes/upload.routes";
+import path from "path";
 import cors from "cors";
 
 const app = express();
@@ -16,6 +19,13 @@ app.use(
 
 app.use(express.json());
 
+app.use(
+  "/uploads",
+  express.static(
+    path.resolve("uploads")
+  )
+);
+
 app.use("/health", healthRoutes);
 
 app.use("/auth", authRoutes);
@@ -23,5 +33,9 @@ app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 
 app.use("/posts", postRoutes);
+
+app.use("/events", eventRoutes);
+
+app.use("/upload", uploadRoutes);
 
 export default app;

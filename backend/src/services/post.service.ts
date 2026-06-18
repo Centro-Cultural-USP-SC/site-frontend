@@ -5,6 +5,8 @@ interface CreatePostInput {
   slug: string;
   summary?: string;
   content: string;
+  category: "EXPOSICAO" | "ACERVO";
+  coverImage?: string;
   published?: boolean;
   authorId: number;
 }
@@ -40,6 +42,7 @@ class PostService {
     slug: string;
     summary: string;
     content: string;
+    category: "EXPOSICAO" | "ACERVO";
     published: boolean;
   }>) {
     return prisma.post.update({
@@ -57,6 +60,30 @@ class PostService {
   async findById(id: number) {
     return prisma.post.findUnique({
       where: { id },
+    });
+  }
+
+  async getExposicoes() {
+    return prisma.post.findMany({
+      where: {
+        category: "EXPOSICAO",
+        published: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
+
+  async getAcervo() {
+    return prisma.post.findMany({
+      where: {
+        category: "ACERVO",
+        published: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
   }
 
