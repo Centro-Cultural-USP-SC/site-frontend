@@ -17,14 +17,12 @@ export default function PostCard({
   const content = (
     <>
       <div className="post-card-image">
-        <img
-            src={
-              image
-                ? `http://localhost:3000${image}`
-                : "https://picsum.photos/600/400"
-            }
-          alt={title}
-        />
+        {image && (
+          <img
+            src={`http://localhost:3000${image}`}
+            alt={title}
+          />
+        )}
       </div>
 
       <div className="post-card-content">
