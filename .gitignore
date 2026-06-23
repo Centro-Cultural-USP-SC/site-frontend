@@ -9,3 +9,22 @@ postgres_data/
 .prisma/
 
 .vscode/
+
+node_modules/
+dist/
+uploads/
+.env
+backups/
+
+frontend/node_modules/
+backend/node_modules/
+
+frontend/dist/
+backend/dist/
+
+*.log
+
+backend/uploads
+
+.env
+backend/.env
