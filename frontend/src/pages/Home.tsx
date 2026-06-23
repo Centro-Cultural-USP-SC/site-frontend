@@ -147,6 +147,7 @@ export default function Home() {
                   key={post.id}
                   title={post.title}
                   summary={post.summary}
+                  image={post.coverImage}
                   slug={post.slug}
                 />
 

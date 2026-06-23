@@ -48,14 +48,36 @@ class EventController {
   }
 
   async update(req: Request, res: Response) {
-    const id = Number(req.params.id);
+    try {
+      const id = Number(req.params.id);
 
-    const event = await eventService.update(
-      id,
-      req.body
-    );
+      const {
+        startDate,
+        endDate,
+        ...rest
+      } = req.body;
 
-    return res.json(event);
+      const event = await eventService.update(id, {
+        ...rest,
+
+        startDate: startDate
+          ? new Date(startDate)
+          : undefined,
+
+        endDate: endDate
+          ? new Date(endDate)
+          : undefined,
+      });
+
+      return res.json(event);
+
+    } catch (error) {
+      console.error(error);
+
+      return res.status(500).json({
+        message: "Error updating event",
+      });
+    }
   }
 
   async delete(req: Request, res: Response) {

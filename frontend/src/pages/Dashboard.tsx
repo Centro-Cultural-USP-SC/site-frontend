@@ -21,7 +21,17 @@ export default function Dashboard() {
 
   const [loading, setLoading] = useState(true);
 
+  const [search, setSearch] = useState("");
+
+  const [currentPage, setCurrentPage] =
+    useState(1);
+
+  const itemsPerPage = 10;
+
   const [editingPostId, setEditingPostId] =
+    useState<number | null>(null);
+  
+  const [editingEventId, setEditingEventId] =
     useState<number | null>(null);
 
   const [title, setTitle] = useState("");
@@ -109,15 +119,34 @@ export default function Dashboard() {
 
       if (tab === "EVENT") {
 
-        await api.post("/events", {
-          title,
-          description,
-          location,
-          coverImage: imageUrl,
-          startDate,
-          endDate,
-          published: true,
-        });
+        if (editingEventId) {
+
+          await api.put(
+            `/events/${editingEventId}`,
+            {
+              title,
+              description,
+              location,
+              coverImage: imageUrl,
+              startDate,
+              endDate,
+              published: true,
+            }
+          );
+
+        } else {
+
+          await api.post("/events", {
+            title,
+            description,
+            location,
+            coverImage: imageUrl,
+            startDate,
+            endDate,
+            published: true,
+          });
+
+        }
 
       } else {
 
@@ -137,14 +166,6 @@ export default function Dashboard() {
           );
 
         } else {
-          console.log({
-            title,
-            slug,
-            summary,
-            content,
-            category,
-            published: true,
-          });
           await api.post("/posts", {
             title,
             slug,
@@ -172,6 +193,7 @@ export default function Dashboard() {
   function resetForm() {
 
     setEditingPostId(null);
+    setEditingEventId(null);
 
     setTitle("");
     setSlug("");
@@ -183,15 +205,28 @@ export default function Dashboard() {
 
     setStartDate("");
     setEndDate("");
+
+    setCoverImage("");
+    setSelectedFile(null);
   }
 
   async function deletePost(id: number) {
+
+    if (
+      !window.confirm(
+        "Deseja realmente excluir este post?"
+      )
+    ) {
+      return;
+    }
+
     await api.delete(`/posts/${id}`);
+
     loadData();
   }
 
   function editPost(post: Post) {
-
+    setEditingEventId(null);
     setEditingPostId(post.id);
 
     setTitle(post.title);
@@ -204,16 +239,97 @@ export default function Dashboard() {
     setCoverImage(
       post.coverImage || ""
     );
+
+  }
+
+  function editEvent(event: Event) {
+    setEditingPostId(null);
+    setEditingEventId(event.id);
+
+    setTitle(event.title);
+    setDescription(event.description);
+
+    setLocation(event.location || "");
+
+    setStartDate(
+      event.startDate.slice(0,16)
+    );
+
+    setEndDate(
+      event.endDate
+        ? event.endDate.slice(0,16)
+        : ""
+    );
+
+    setCoverImage(
+      event.coverImage || ""
+    );
   }
 
   async function deleteEvent(id: number) {
+
+    if (
+      !window.confirm(
+        "Deseja realmente excluir este evento?"
+      )
+    ) {
+      return;
+    }
+
     await api.delete(`/events/${id}`);
+
     loadData();
   }
 
-  if (loading) {
-    return <p>Carregando...</p>;
-  }
+  const filteredPosts = posts
+    .filter(p => p.category === tab)
+    .filter(p =>
+      (
+        p.title +
+        " " +
+        (p.summary || "")
+      )
+        .toLowerCase()
+        .includes(
+          search.toLowerCase()
+        )
+    );
+
+  const filteredEvents = events
+    .filter(e =>
+      (
+        e.title +
+        " " +
+        e.description
+      )
+        .toLowerCase()
+        .includes(
+          search.toLowerCase()
+        )
+    );
+
+    const data =
+      tab === "EVENT"
+        ? filteredEvents
+        : filteredPosts;
+
+    const paginatedData =
+      data.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+      );
+
+    const totalPages = Math.max(
+      1,
+      Math.ceil(
+        data.length / itemsPerPage
+      )
+    );
+
+    
+    if (loading) {
+      return <p>Carregando...</p>;
+    }
 
   return (
     <Layout>
@@ -224,28 +340,42 @@ export default function Dashboard() {
           <h1>Dashboard</h1>
         </div>
 
+        <div className="dashboard-header">
+          <h2>
+            {editingPostId || editingEventId
+              ? "Editando conteúdo"
+              : "Novo conteúdo"}
+          </h2>
+        </div>
+
         <div className="dashboard-tabs">
 
           <button
-            onClick={() =>
-              setTab("EXPOSICAO")
-            }
+            onClick={() => {
+              resetForm();
+              setTab("EXPOSICAO");
+              setCurrentPage(1);
+            }}
           >
             Exposições
           </button>
 
           <button
-            onClick={() =>
-              setTab("ACERVO")
-            }
+            onClick={() => {
+              resetForm();
+              setTab("ACERVO");
+              setCurrentPage(1);
+            }}
           >
             Acervo
           </button>
 
           <button
-            onClick={() =>
+            onClick={() => {
+              resetForm();
               setTab("EVENT")
-            }
+              setCurrentPage(1);
+            }}
           >
             Programação
           </button>
@@ -271,6 +401,18 @@ export default function Dashboard() {
               )
             }
           />
+
+          {(selectedFile || coverImage) && (
+            <img
+              src={
+                selectedFile
+                  ? URL.createObjectURL(selectedFile)
+                  : `http://localhost:3000${coverImage}`
+              }
+              alt="Preview"
+              className="dashboard-preview"
+            />
+          )}
 
           {tab !== "EVENT" && (
             <>
@@ -361,85 +503,179 @@ export default function Dashboard() {
                 }
               />
 
-              <input
-                placeholder="Imagem"
-                value={coverImage}
-                onChange={(e) =>
-                  setCoverImage(e.target.value)
-                }
-              />
             </>
           )}
 
-          <button onClick={handleSubmit}>
-            Salvar
+        <button onClick={handleSubmit}>
+          {
+            editingPostId || editingEventId
+              ? "Atualizar"
+              : "Criar"
+          }
+        </button>
+
+        {(editingPostId || editingEventId) && (
+          <button
+            type="button"
+            onClick={resetForm}
+          >
+            Cancelar
           </button>
+        )}
 
         </div>
 
-        <div className="dashboard-list">
+          <div className="dashboard-toolbar">
 
-          {tab === "EVENT"
-            ? events.map(event => (
-                <div
-                  key={event.id}
-                  className="dashboard-item"
-                >
-                  <h3>{event.title}</h3>
+            <input
+              type="text"
+              placeholder="Buscar..."
+              value={search}
+              onChange={(e) => {
+                setSearch(
+                  e.target.value
+                );
 
-                  <p>
-                    {event.description}
-                  </p>
+                setCurrentPage(1);
+              }}
+            />
 
+          </div>
+
+        <div className="dashboard-table-wrapper">
+
+          <table className="dashboard-table">
+
+            <thead>
+
+              <tr>
+
+                <th>Imagem</th>
+
+                <th>Título</th>
+
+                <th>
+                  {tab === "EVENT"
+                    ? "Data"
+                    : "Resumo"}
+                </th>
+
+                <th>Ações</th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              {paginatedData.map((item: any) => (
+
+                <tr key={item.id}>
+
+                  <td>
+
+                    <img
+                      className="dashboard-thumb"
+                      src={
+                        item.coverImage
+                          ? `http://localhost:3000${item.coverImage}`
+                          : "https://picsum.photos/80"
+                      }
+                      alt={item.title}
+                    />
+
+                  </td>
+
+                  <td>
+                    {item.title}
+                  </td>
+
+                  <td>
+
+                    {tab === "EVENT"
+                      ? new Date(
+                          item.startDate
+                        ).toLocaleDateString(
+                          "pt-BR"
+                        )
+                      : item.summary}
+
+                  </td>
+
+                  <td>
                   <button
+                    className="btn-edit"
                     onClick={() =>
-                      deleteEvent(
-                        event.id
-                      )
+
+                      tab === "EVENT"
+                        ? editEvent(item)
+                        : editPost(item)
+
                     }
                   >
-                    Excluir
+                    Editar
                   </button>
-                </div>
-              ))
 
-            : posts
-                .filter(
-                  p =>
-                    p.category ===
-                    tab
-                )
-                .map(post => (
-                  <div
-                    key={post.id}
-                    className="dashboard-item"
-                  >
-                    <h3>
-                      {post.title}
-                    </h3>
-
-                    <p>
-                      {post.summary}
-                    </p>
-
-                    <button
+                    <button className="btn-delete"
                       onClick={() =>
-                        deletePost(
-                          post.id
-                        )
+
+                        tab === "EVENT"
+                          ? deleteEvent(
+                              item.id
+                            )
+                          : deletePost(
+                              item.id
+                            )
+
                       }
                     >
                       Excluir
                     </button>
 
-                    <button
-                      onClick={() => editPost(post)}
-                    >
-                      Editar
-                    </button>
-                  </div>
-                ))
-          }
+                  </td>
+
+                </tr>
+
+              ))}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+        <div className="pagination">
+
+          <button
+            disabled={
+              currentPage === 1
+            }
+            onClick={() =>
+              setCurrentPage(
+                p => p - 1
+              )
+            }
+          >
+            ←
+          </button>
+
+          <span>
+            Página {currentPage}
+            de {totalPages}
+          </span>
+
+          <button
+            disabled={
+              currentPage === totalPages
+            }
+            onClick={() =>
+              setCurrentPage(
+                p => p + 1
+              )
+            }
+          >
+            →
+          </button>
 
         </div>
 
