@@ -1,3 +1,304 @@
+# Centro Cultural USP São Carlos
+
+Sistema institucional desenvolvido para o Centro Cultural da USP São Carlos, permitindo a divulgação da programação cultural, das exposições atuais e passadas, além do gerenciamento e documentação do acervo artístico e documental da instituição.
+
+## Funcionalidades
+
+- Divulgação da programação cultural.
+- Exibição de exposições atuais e anteriores.
+- Gerenciamento do acervo artístico.
+- Gerenciamento do acervo documental.
+- Área administrativa para gerenciamento do conteúdo.
+- API REST para comunicação entre frontend e backend.
+- Banco de dados PostgreSQL para armazenamento das informações.
+
+---
+
+## Tecnologias Utilizadas
+
+### Frontend
+
+- React
+- TypeScript
+- Vite
+- React Router DOM
+- Axios
+- Nginx (produção)
+
+### Backend
+
+- Node.js
+- Express
+- TypeScript
+- Prisma ORM
+- PostgreSQL
+- JWT
+- Bcrypt
+- Multer
+
+### Infraestrutura
+
+- Docker
+- Docker Compose
+
+---
+
+## Arquitetura
+
+```text
+                 Usuário
+                    │
+                    ▼
+         Frontend (React + Vite)
+                    │
+              Requisições HTTP
+                    │
+                    ▼
+      Backend (Node.js + Express)
+                    │
+             Prisma ORM
+                    │
+                    ▼
+        PostgreSQL (Banco de Dados)
+```
+
+---
+
+## Estrutura do Projeto
+
+```text
+.
+├── backend
+│   ├── prisma
+│   ├── scripts
+│   ├── src
+│   └── Dockerfile
+│
+├── frontend
+│   ├── public
+│   ├── src
+│   └── Dockerfile
+│
+├── backups
+│
+├── scripts
+│
+├── docker-compose.yml
+│
+└── README.md
+```
+
+---
+
+## Pré-requisitos
+
+Antes de executar o projeto é necessário possuir instalado:
+
+- Git
+- Docker
+- Docker Compose
+- Node.js 20 (caso execute sem Docker)
+- npm
+
+---
+
+## Clonando o Projeto
+
+```bash
+git clone <URL_DO_REPOSITORIO>
+
+cd <nome-do-projeto>
+```
+
+---
+
+## Configuração
+
+Crie um arquivo `.env` no backend contendo as seguintes variáveis:
+
+```env
+POSTGRES_DB=centro_cultural
+
+POSTGRES_USER=admin
+
+POSTGRES_PORT=5432
+
+DATABASE_URL="postgresql://admin:SUA_SENHA@localhost:5432/centro_cultural"
+```
+
+> **Observação:** substitua `SUA_SENHA` pela senha utilizada no banco de dados.
+
+---
+
+## Executando com Docker
+
+Na raiz do projeto execute:
+
+```bash
+docker compose up --build
+```
+
+O Docker será responsável por:
+
+- construir as imagens do frontend e backend;
+- instalar as dependências;
+- gerar o cliente Prisma;
+- executar as migrations;
+- popular o banco de dados (seed);
+- iniciar a aplicação.
+
+---
+
+## Executando sem Docker
+
+### Backend
+
+```bash
+cd backend
+
+npm install
+
+npm run build
+
+npm start
+```
+
+ou durante o desenvolvimento:
+
+```bash
+npm run dev
+```
+
+---
+
+### Frontend
+
+```bash
+cd frontend
+
+npm install
+
+npm run dev
+```
+
+---
+
+## Banco de Dados
+
+O projeto utiliza PostgreSQL juntamente com o Prisma ORM.
+
+### Executar as migrations
+
+```bash
+npm run db:migrate
+```
+
+### Popular o banco
+
+```bash
+npm run db:seed
+```
+
+---
+
+## Scripts do Backend
+
+| Script | Descrição |
+|---------|-----------|
+| `npm run dev` | Executa o backend em modo de desenvolvimento. |
+| `npm run build` | Compila o projeto TypeScript. |
+| `npm start` | Executa a versão compilada. |
+| `npm run db:migrate` | Executa as migrations do banco de dados. |
+| `npm run db:seed` | Popula o banco com dados iniciais. |
+| `npm run docker:start` | Executa migrations, seed e inicia a aplicação. |
+
+---
+
+## Scripts do Frontend
+
+| Script | Descrição |
+|---------|-----------|
+| `npm run dev` | Inicia o servidor de desenvolvimento. |
+| `npm run build` | Gera a versão de produção. |
+| `npm run preview` | Executa a versão compilada localmente. |
+| `npm run lint` | Analisa o código utilizando o ESLint. |
+
+---
+
+## Docker
+
+O backend utiliza um container baseado em **Node.js 20**, responsável por:
+
+- instalar as dependências;
+- gerar o Prisma Client;
+- compilar a aplicação;
+- iniciar o servidor.
+
+O frontend utiliza uma construção em duas etapas (**multi-stage build**):
+
+1. Build da aplicação React utilizando Node.js;
+2. Servir os arquivos estáticos utilizando Nginx.
+
+---
+
+## Organização do Projeto
+
+### Backend
+
+```
+src/
+├── config
+├── controllers
+├── middleware
+├── routes
+├── services
+└── types
+```
+
+### Frontend
+
+```
+src/
+├── assets
+├── components
+├── hooks
+├── pages
+├── routes
+├── services
+├── styles
+└── types
+```
+
+---
+
+## Backup
+
+O projeto possui scripts para backup e restauração do banco de dados localizados em:
+
+```
+scripts/
+├── backup.sh
+└── restore.sh
+```
+
+Os arquivos de backup são armazenados na pasta:
+
+```
+backups/
+```
+
+---
+
+## Autores
+
+Projeto desenvolvido para o **Centro Cultural da USP São Carlos**.
+
+---
+
+## Licença
+
+Este projeto foi desenvolvido para fins acadêmicos e institucionais.
+
 # Backend - Dependências
 
 Este documento descreve as dependências utilizadas no backend do projeto e suas respectivas funções.
