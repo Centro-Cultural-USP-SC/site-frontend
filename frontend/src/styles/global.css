@@ -141,6 +141,17 @@ a {
   border-top: 1px solid rgba(0,0,0,0.1);
 }
 
+.footer-logos {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.footer-logo {
+  height: 40px; /* ajuste conforme o tamanho desejado */
+  width: auto;
+}
+
 /*HERO*/
 
 .hero {
