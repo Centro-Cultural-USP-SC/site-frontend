@@ -7,6 +7,8 @@ import Dashboard from "../pages/Dashboard";
 import Programacao from "../pages/Programacao";
 import Exposicoes from "../pages/Exposicoes";
 import Acervo from "../pages/Acervo";
+import CategoriaAcervo from "../pages/CategoriaAcervo";
+import ObraDetalhes from "../pages/ObraDetalhes";
 
 function PrivateRoute({ children }: any) {
   const token = localStorage.getItem("token");
@@ -48,6 +50,9 @@ export default function AppRoutes() {
           path="/acervo"
           element={<Acervo />}
         />
+
+        <Route path="/acervo/:categoria" element={<CategoriaAcervo />} />
+        <Route path="/acervo/obra/:slug" element={<ObraDetalhes />} />
 
       </Routes>
     </BrowserRouter>

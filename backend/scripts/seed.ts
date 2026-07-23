@@ -28,6 +28,41 @@ async function main() {
   });
 
   console.log("Admin created successfully.");
+
+
+await prisma.artworkCategory.createMany({
+
+    data:[
+        {
+            name:"Gravuras",
+            slug:"gravuras"
+        },
+        {
+            name:"Fotografias",
+            slug:"fotografias"
+        },
+        {
+            name:"Desenhos",
+            slug:"desenhos"
+        },
+        {
+            name:"Pinturas",
+            slug:"pinturas"
+        },
+        {
+            name:"Têxtil",
+            slug:"textil"
+        },
+        {
+            name:"Escultura",
+            slug:"escultura"
+        }
+    ],
+
+    skipDuplicates:true
+
+});
+
 }
 
 main()
