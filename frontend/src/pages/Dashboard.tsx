@@ -6,7 +6,8 @@ import { api } from "../services/api";
 import type {
   Event,
   Post,
-  PostCategory,
+  Artwork,
+  ArtworkCategory
 } from "../types/content";
 
 export default function Dashboard() {
@@ -16,68 +17,65 @@ export default function Dashboard() {
     "EVENT"
   >("EXPOSICAO");
 
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [events, setEvents] = useState<Event[]>([]);
+const [posts,setPosts] = useState<Post[]>([]);
+const [events,setEvents] = useState<Event[]>([]);
+const [artworks,setArtworks] = useState<Artwork[]>([]);
+const [artworkCategories, setArtworkCategories] = useState<ArtworkCategory[]>([]);
+const [loading, setLoading] = useState(true);
+const [search, setSearch] = useState("");
+const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 10;
 
-  const [loading, setLoading] = useState(true);
+const [editingPostId, setEditingPostId] = useState<number | null>(null);
+const [editingEventId, setEditingEventId] = useState<number | null>(null);
+const [editingArtworkId, setEditingArtworkId] = useState<number | null>(null);
 
-  const [search, setSearch] = useState("");
+const [title, setTitle] = useState("");
+const [slug, setSlug] = useState("");
+const [summary, setSummary] = useState("");
+const [content, setContent] = useState("");
+// Campos do acervo
+const [registrationNumber, setRegistrationNumber] = useState("");
+const [patrimonyNumber, setPatrimonyNumber] = useState("");
+const [chronology, setChronology] = useState("");
+const [authorship, setAuthorship] = useState("");
+const [technique, setTechnique] = useState("");
+const [dimensions, setDimensions] = useState("");
+const [responsible, setResponsible] = useState("");
+const [physicalLocation, setPhysicalLocation] = useState(""); 
+const [conservationState, setConservationState] = useState("");
+const [internalNotes, setInternalNotes] = useState("");
+const [authorBiography, setAuthorBiography] = useState("");
+const [artworkCategoryId, setArtworkCategoryId] = useState<number | null>(null);
 
-  const [currentPage, setCurrentPage] =
-    useState(1);
+const [description, setDescription] = useState("");
+const [location, setLocation] = useState("");
+const [startDate, setStartDate] = useState("");
+const [endDate, setEndDate] = useState("");
+const [coverImage, setCoverImage] = useState("");  
+const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const itemsPerPage = 10;
-
-  const [editingPostId, setEditingPostId] =
-    useState<number | null>(null);
-  
-  const [editingEventId, setEditingEventId] =
-    useState<number | null>(null);
-
-  const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
-  const [summary, setSummary] = useState("");
-  const [content, setContent] = useState("");
-
-  const [category, setCategory] =
-    useState<PostCategory>("EXPOSICAO");
-
-  const [description, setDescription] =
-    useState("");
-
-  const [location, setLocation] =
-    useState("");
-
-  const [startDate, setStartDate] =
-    useState("");
-
-  const [endDate, setEndDate] =
-    useState("");
-
-  const [coverImage, setCoverImage] =
-    useState("");
-  
-  const [selectedFile, setSelectedFile] =
-    useState<File | null>(null);
-
-  async function loadData() {
-    try {
-      const [postsRes, eventsRes] =
-        await Promise.all([
-          api.get("/posts"),
-          api.get("/events"),
-        ]);
-
-      setPosts(postsRes.data);
-      setEvents(eventsRes.data);
-    } finally {
-      setLoading(false);
-    }
+async function loadData() {
+  try {
+    const [ postsRes, eventsRes, artworksRes, categoriesRes]= await Promise.all([
+      api.get("/posts"),
+      api.get("/events"),
+      api.get("/artworks"),
+      api.get("/artwork-categories")
+    ]);
+  setPosts(postsRes.data);
+  setEvents(eventsRes.data);
+  setArtworks(artworksRes.data);
+  setArtworkCategories(categoriesRes.data)
   }
+  finally {
+    setLoading(false);
+  }
+}
 
-  useEffect(() => {
-    loadData();
-  }, []);
+useEffect(() => {
+  loadData();
+}, []);
 
   async function uploadImage() {
 
@@ -93,13 +91,10 @@ export default function Dashboard() {
     );
 
     const response =
-      await api.post(
-        "/upload",
-        formData,
-        {
+      await api.post( "/upload", formData, {
           headers: {
             "Content-Type":
-              "multipart/form-data",
+            "multipart/form-data",
           },
         }
       );
@@ -107,111 +102,196 @@ export default function Dashboard() {
     return response.data.imageUrl;
   }
 
-  async function handleSubmit() {
-    try {
-      
-      let imageUrl = coverImage;
+async function handleSubmit(){
+  try{
+  let imageUrl = coverImage;
 
-      if (selectedFile) {
-        imageUrl =
-          await uploadImage();
-      }
-
-      if (tab === "EVENT") {
-
-        if (editingEventId) {
-
-          await api.put(
-            `/events/${editingEventId}`,
-            {
-              title,
-              description,
-              location,
-              coverImage: imageUrl,
-              startDate,
-              endDate,
-              published: true,
-            }
-          );
-
-        } else {
-
-          await api.post("/events", {
-            title,
-            description,
-            location,
-            coverImage: imageUrl,
-            startDate,
-            endDate,
-            published: true,
-          });
-
-        }
-
-      } else {
-
-        if (editingPostId) {
-
-          await api.put(
-            `/posts/${editingPostId}`,
-            {
-              title,
-              slug,
-              summary,
-              content,
-              category,
-              coverImage: imageUrl,
-              published: true,
-            }
-          );
-
-        } else {
-          await api.post("/posts", {
-            title,
-            slug,
-            summary,
-            content,
-            category,
-            coverImage: imageUrl,
-            published: true,
-          });
-
-        }
-
-      }
-
-      resetForm();
-
-      loadData();
-
-    } catch (error) {
-      console.error(error);
-      alert("Erro ao salvar");
-    }
+  if(selectedFile){
+  imageUrl = await uploadImage();
   }
+
+  if (tab === "EVENT") {
+
+  if (editingEventId) {
+
+    await api.put(`/events/${editingEventId}`, {
+      title,
+      description,
+      location,
+      coverImage: imageUrl,
+      startDate,
+      endDate,
+      published: true,
+    });
+
+  } else {
+
+    await api.post("/events", {
+      title,
+      description,
+      location,
+      coverImage: imageUrl,
+      startDate,
+      endDate,
+      published: true,
+    });
+
+  }
+
+}
+else if (tab === "EXPOSICAO") {
+
+  if (editingPostId) {
+
+    await api.put(`/posts/${editingPostId}`, {
+      title,
+      slug,
+      summary,
+      content,
+      category: "EXPOSICAO",
+      coverImage: imageUrl,
+      published: true,
+    });
+
+  } else {
+
+    await api.post("/posts", {
+      title,
+      slug,
+      summary,
+      content,
+      category: "EXPOSICAO",
+      coverImage: imageUrl,
+      published: true,
+    });
+
+  }
+
+}
+else if (tab === "ACERVO") {
+
+  if (!artworkCategoryId) {
+    alert("Selecione uma categoria");
+    return;
+  }
+
+  if (editingArtworkId) {
+
+    await api.put(`/artworks/${editingArtworkId}`, {
+      title,
+      slug,
+      categoryId: artworkCategoryId,
+      registrationNumber,
+      patrimonyNumber,
+      chronology,
+      authorship,
+      technique,
+      dimensions,
+      description,
+      responsible,
+      physicalLocation,
+      conservationState,
+      internalNotes,
+      authorBiography,
+      coverImage: imageUrl,
+    });
+
+  } else {
+
+    await api.post("/artworks", {
+      title,
+      slug,
+      categoryId: artworkCategoryId,
+      registrationNumber,
+      patrimonyNumber,
+      chronology,
+      authorship,
+      technique,
+      dimensions,
+      description,
+      responsible,
+      physicalLocation,
+      conservationState,
+      internalNotes,
+      authorBiography,
+      coverImage: imageUrl,
+    });
+
+  }
+
+}
+
+  resetForm();
+  loadData();
+
+  }catch(error){
+  console.error(error);
+  alert("Erro ao salvar");
+  }
+}
 
   function resetForm() {
 
+    setEditingArtworkId(null);
     setEditingPostId(null);
     setEditingEventId(null);
-
     setTitle("");
     setSlug("");
     setSummary("");
     setContent("");
-
     setDescription("");
     setLocation("");
-
     setStartDate("");
     setEndDate("");
-
     setCoverImage("");
     setSelectedFile(null);
+    setRegistrationNumber("");
+    setPatrimonyNumber("");
+    setChronology("");
+    setAuthorship("");
+    setTechnique("");
+    setDimensions("");
+    setResponsible("");
+    setPhysicalLocation("");
+    setConservationState("");
+    setInternalNotes("");
+    setAuthorBiography("");
+    setArtworkCategoryId(null);
   }
 
-  async function deletePost(id: number) {
+  async function deleteArtwork(id:number){
 
+    if(!window.confirm("Deseja excluir esta obra?")){
+    return;
+    }
+    await api.delete(`/artworks/${id}`);
+    loadData();
+    }
+
+function editArtwork(artwork:Artwork){
+
+setEditingPostId(null);
+setEditingEventId(null);
+setEditingArtworkId(artwork.id);
+ setTitle(artwork.title);
+ setSlug(artwork.slug);
+ setRegistrationNumber(artwork.registrationNumber || "");
+ setPatrimonyNumber(artwork.patrimonyNumber || "");
+ setTechnique(artwork.technique || "");
+ setAuthorship(artwork.authorship || "");
+ setCoverImage(artwork.coverImage || "");
+setArtworkCategoryId(artwork.category?.id || null);
+setChronology(artwork.chronology || "");
+setDimensions(artwork.dimensions || "");
+setDescription(artwork.description || "");
+setResponsible(artwork.responsible || "");
+setPhysicalLocation(artwork.physicalLocation || "");
+setConservationState(artwork.conservationState || "");
+setInternalNotes(artwork.internalNotes || "");
+setAuthorBiography(artwork.authorBiography || "");
+}
+
+  async function deletePost(id: number) {
     if (
       !window.confirm(
         "Deseja realmente excluir este post?"
@@ -219,9 +299,7 @@ export default function Dashboard() {
     ) {
       return;
     }
-
     await api.delete(`/posts/${id}`);
-
     loadData();
   }
 
@@ -233,13 +311,9 @@ export default function Dashboard() {
     setSlug(post.slug);
     setSummary(post.summary || "");
     setContent(post.content);
-
-    setCategory(post.category);
-
     setCoverImage(
       post.coverImage || ""
     );
-
   }
 
   function editEvent(event: Event) {
@@ -281,6 +355,17 @@ export default function Dashboard() {
     loadData();
   }
 
+const filteredArtworks = artworks
+.filter(a =>
+  (
+    a.title +
+    " " +
+    (a.description || "")
+  )
+  .toLowerCase()
+  .includes(search.toLowerCase())
+);
+
   const filteredPosts = posts
     .filter(p => p.category === tab)
     .filter(p =>
@@ -311,7 +396,9 @@ export default function Dashboard() {
     const data =
       tab === "EVENT"
         ? filteredEvents
-        : filteredPosts;
+        : tab === "ACERVO"
+          ? filteredArtworks
+          : filteredPosts;
 
     const paginatedData =
       data.slice(
@@ -342,7 +429,7 @@ export default function Dashboard() {
 
         <div className="dashboard-header">
           <h2>
-            {editingPostId || editingEventId
+            {editingPostId || editingEventId || editingArtworkId
               ? "Editando conteúdo"
               : "Novo conteúdo"}
           </h2>
@@ -414,52 +501,188 @@ export default function Dashboard() {
             />
           )}
 
-          {tab !== "EVENT" && (
-            <>
-              <input
-                placeholder="Slug"
-                value={slug}
-                onChange={(e) =>
-                  setSlug(e.target.value)
-                }
-              />
+{tab === "EXPOSICAO" && (
+  <>
 
-              <input
-                placeholder="Resumo"
-                value={summary}
-                onChange={(e) =>
-                  setSummary(e.target.value)
-                }
-              />
+    <input
+      placeholder="Slug"
+      value={slug}
+      onChange={(e) =>
+        setSlug(e.target.value)
+      }
+    />
 
-              <textarea
-                placeholder="Conteúdo"
-                value={content}
-                onChange={(e) =>
-                  setContent(e.target.value)
-                }
-              />
+    <input
+      placeholder="Resumo"
+      value={summary}
+      onChange={(e) =>
+        setSummary(e.target.value)
+      }
+    />
 
-              <select
-                value={category}
-                onChange={(e) =>
-                  setCategory(
-                    e.target
-                      .value as PostCategory
-                  )
-                }
-              >
-                <option value="EXPOSICAO">
-                  Exposição
-                </option>
+    <textarea
+      placeholder="Conteúdo"
+      value={content}
+      onChange={(e) =>
+        setContent(e.target.value)
+      }
+    />
 
-                <option value="ACERVO">
-                  Acervo
-                </option>
+  </>
+)}
 
-              </select>
-            </>
-          )}
+
+{tab === "ACERVO" && (
+  <>
+
+    <input
+      placeholder="Número de registro"
+      value={registrationNumber}
+      onChange={(e) =>
+        setRegistrationNumber(e.target.value)
+      }
+    />
+
+
+    <input
+      placeholder="Número de patrimônio"
+      value={patrimonyNumber}
+      onChange={(e) =>
+        setPatrimonyNumber(e.target.value)
+      }
+    />
+
+
+    <input
+      placeholder="Slug"
+      value={slug}
+      onChange={(e) =>
+        setSlug(e.target.value)
+      }
+    />
+
+
+    <input
+      placeholder="Cronologia"
+      value={chronology}
+      onChange={(e) =>
+        setChronology(e.target.value)
+      }
+    />
+
+
+    <input
+      placeholder="Autoria"
+      value={authorship}
+      onChange={(e) =>
+        setAuthorship(e.target.value)
+      }
+    />
+
+
+    <input
+      placeholder="Técnica / Material"
+      value={technique}
+      onChange={(e) =>
+        setTechnique(e.target.value)
+      }
+    />
+
+
+    <input
+      placeholder="Dimensões"
+      value={dimensions}
+      onChange={(e) =>
+        setDimensions(e.target.value)
+      }
+    />
+
+
+    <textarea
+      placeholder="Descrição da obra"
+      value={description}
+      onChange={(e) =>
+        setDescription(e.target.value)
+      }
+    />
+
+
+    <input
+      placeholder="Responsável"
+      value={responsible}
+      onChange={(e) =>
+        setResponsible(e.target.value)
+      }
+    />
+
+
+    <input
+      placeholder="Localização física"
+      value={physicalLocation}
+      onChange={(e) =>
+        setPhysicalLocation(e.target.value)
+      }
+    />
+
+
+    <input
+      placeholder="Estado de conservação"
+      value={conservationState}
+      onChange={(e) =>
+        setConservationState(e.target.value)
+      }
+    />
+
+
+    <textarea
+      placeholder="Outras considerações internas"
+      value={internalNotes}
+      onChange={(e) =>
+        setInternalNotes(e.target.value)
+      }
+    />
+
+
+    <textarea
+      placeholder="Sobre o autor"
+      value={authorBiography}
+      onChange={(e) =>
+        setAuthorBiography(e.target.value)
+      }
+    />
+
+
+    <select
+      value={artworkCategoryId ?? ""}
+      onChange={(e) =>
+        setArtworkCategoryId(
+          Number(e.target.value)
+        )
+      }
+    >
+
+      <option value="">
+        Selecione uma categoria
+      </option>
+
+
+      {artworkCategories.map(category => (
+
+        <option
+          key={category.id}
+          value={category.id}
+        >
+          {category.name}
+        </option>
+
+      ))}
+
+
+    </select>
+
+
+  </>
+)}
 
           {tab === "EVENT" && (
             <>
@@ -508,13 +731,13 @@ export default function Dashboard() {
 
         <button onClick={handleSubmit}>
           {
-            editingPostId || editingEventId
+            editingPostId || editingEventId || editingArtworkId
               ? "Atualizar"
               : "Criar"
           }
         </button>
 
-        {(editingPostId || editingEventId) && (
+        {(editingPostId || editingEventId || editingArtworkId) && (
           <button
             type="button"
             onClick={resetForm}
@@ -554,11 +777,18 @@ export default function Dashboard() {
 
                 <th>Título</th>
 
-                <th>
-                  {tab === "EVENT"
-                    ? "Data"
-                    : "Resumo"}
-                </th>
+                {tab === "ACERVO" ? (
+                  <>
+                    <th>Categoria</th>
+                    <th>Registro</th>
+                  </>
+                ) : (
+                  <th>
+                    {tab === "EVENT"
+                      ? "Data"
+                      : "Resumo"}
+                  </th>
+                )}
 
                 <th>Ações</th>
 
@@ -568,75 +798,134 @@ export default function Dashboard() {
 
             <tbody>
 
-              {paginatedData.map((item: any) => (
+              {paginatedData.map((item) => {
 
-                <tr key={item.id}>
+                if (tab === "ACERVO") {
+                  const artwork = item as Artwork;
 
-                  <td>
+                  return (
+                    <tr key={artwork.id}>
 
-                    <img
-                      className="dashboard-thumb"
-                      src={
-                        item.coverImage
-                          ? `http://localhost:3000${item.coverImage}`
-                          : "https://picsum.photos/80"
-                      }
-                      alt={item.title}
-                    />
+                      <td>
+                        <img
+                          className="dashboard-thumb"
+                          src={
+                            artwork.coverImage
+                              ? `http://localhost:3000${artwork.coverImage}`
+                              : "https://picsum.photos/80"
+                          }
+                          alt={artwork.title}
+                        />
+                      </td>
 
-                  </td>
+                      <td>{artwork.title}</td>
 
-                  <td>
-                    {item.title}
-                  </td>
+                      <td>{artwork.category?.name || "-"}</td>
 
-                  <td>
+                      <td>{artwork.registrationNumber || "-"}</td>
 
-                    {tab === "EVENT"
-                      ? new Date(
-                          item.startDate
-                        ).toLocaleDateString(
-                          "pt-BR"
-                        )
-                      : item.summary}
+                      <td>
+                        <button
+                          className="btn-edit"
+                          onClick={() => editArtwork(artwork)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className="btn-delete"
+                          onClick={() => deleteArtwork(artwork.id)}
+                        >
+                          Excluir
+                        </button>
+                      </td>
 
-                  </td>
+                    </tr>
+                  );
+                }
 
-                  <td>
-                  <button
-                    className="btn-edit"
-                    onClick={() =>
+                if (tab === "EVENT") {
+                  const event = item as Event;
 
-                      tab === "EVENT"
-                        ? editEvent(item)
-                        : editPost(item)
+                  return (
+                    <tr key={event.id}>
 
-                    }
-                  >
-                    Editar
-                  </button>
+                      <td>
+                        <img
+                          className="dashboard-thumb"
+                          src={
+                            event.coverImage
+                              ? `http://localhost:3000${event.coverImage}`
+                              : "https://picsum.photos/80"
+                          }
+                          alt={event.title}
+                        />
+                      </td>
 
-                    <button className="btn-delete"
-                      onClick={() =>
+                      <td>{event.title}</td>
 
-                        tab === "EVENT"
-                          ? deleteEvent(
-                              item.id
-                            )
-                          : deletePost(
-                              item.id
-                            )
+                      <td>
+                        {new Date(event.startDate).toLocaleDateString("pt-BR")}
+                      </td>
 
-                      }
-                    >
-                      Excluir
-                    </button>
+                      <td>
+                        <button
+                          className="btn-edit"
+                          onClick={() => editEvent(event)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className="btn-delete"
+                          onClick={() => deleteEvent(event.id)}
+                        >
+                          Excluir
+                        </button>
+                      </td>
 
-                  </td>
+                    </tr>
+                  );
+                }
 
-                </tr>
+                const post = item as Post;
 
-              ))}
+                return (
+                  <tr key={post.id}>
+
+                    <td>
+                      <img
+                        className="dashboard-thumb"
+                        src={
+                          post.coverImage
+                            ? `http://localhost:3000${post.coverImage}`
+                            : "https://picsum.photos/80"
+                        }
+                        alt={post.title}
+                      />
+                    </td>
+
+                    <td>{post.title}</td>
+
+                    <td>{post.summary}</td>
+
+                    <td>
+                      <button
+                        className="btn-edit"
+                        onClick={() => editPost(post)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        className="btn-delete"
+                        onClick={() => deletePost(post.id)}
+                      >
+                        Excluir
+                      </button>
+                    </td>
+
+                  </tr>
+                );
+
+              })}
 
             </tbody>
 

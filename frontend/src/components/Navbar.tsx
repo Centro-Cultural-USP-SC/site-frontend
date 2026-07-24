@@ -16,8 +16,6 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  console.log(scroll);
-
   return (
     <header
       className="navbar"

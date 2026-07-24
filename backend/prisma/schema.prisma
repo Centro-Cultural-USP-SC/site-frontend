@@ -17,27 +17,24 @@ model User {
   username     String @unique
   email        String @unique
   passwordHash String
-
   role String @default("admin")
-
   posts Post[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Post {
-  id        Int          @id @default(autoincrement())
-  title     String
-  slug      String       @unique
-  summary   String?
-  content   String
-  category  PostCategory
-  published Boolean      @default(false)
-  coverImage String?
 
+  id Int @id @default(autoincrement())
+  title String
+  slug String @unique
+  summary String?
+  content String
+  category  PostCategory
+  published Boolean @default(false)
+  coverImage String?
   authorId Int?
-  author   User? @relation(fields: [authorId], references: [id])
+  author User? @relation( fields:[authorId], references:[id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -49,12 +46,42 @@ model Event {
   description String
   location    String?
   coverImage  String?
-
   startDate DateTime
   endDate   DateTime?
-
   published Boolean @default(false)
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Artwork {
+
+  id Int @id @default(autoincrement())
+  categoryId Int
+  category ArtworkCategory @relation( fields: [categoryId], references: [id])
+
+  registrationNumber String?
+  patrimonyNumber String?
+  title String
+  slug String @unique
+  chronology String?
+  authorship String?
+  technique String?
+  dimensions String?
+  description String?
+  responsible String?
+  physicalLocation String?
+  conservationState String?
+  internalNotes String?
+  authorBiography String?
+  coverImage String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ArtworkCategory {
+
+  id Int @id @default(autoincrement())
+  name String
+  slug String @unique
+  artworks Artwork[]
 }
