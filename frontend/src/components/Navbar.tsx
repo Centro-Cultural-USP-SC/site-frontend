@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 
+import logoImg from "../assets/navbar-logo.png"; 
+
 export default function Navbar() {
   const [scroll, setScroll] = useState(0);
 
@@ -25,9 +27,10 @@ export default function Navbar() {
         } as React.CSSProperties
       }
     >
-      <div className="logo">
-        Centro Cultural
-      </div>
+      {/* Transformed into a Link to homepage wrapping the image */}
+      <Link to="/" className="logo">
+        <img src={logoImg} alt="Centro Cultural" />
+      </Link>
 
       <nav>
         <Link to="/">Início</Link>

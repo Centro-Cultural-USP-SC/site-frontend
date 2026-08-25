@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom"; // Add Link aqui
 import Layout from "../components/Layout";
 import Container from "../components/Container";
 import { api } from "../services/api";
@@ -17,7 +17,6 @@ type ArtworkDetails = {
 
 export default function ObraDetalhes() {
   const { slug } = useParams();
-  const navigate = useNavigate();
   const [obra, setObra] = useState<ArtworkDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -28,7 +27,6 @@ export default function ObraDetalhes() {
         setObra(response.data);
       } catch (error) {
         console.error("Erro ao carregar a obra:", error);
-        // Pode redirecionar para uma página de 404 se não achar
       } finally {
         setLoading(false);
       }
@@ -42,13 +40,12 @@ export default function ObraDetalhes() {
   return (
     <Layout>
       <Container>
-        {/* Botão simples para voltar para a página anterior (a categoria) */}
-        <button onClick={() => navigate(-1)} className="btn-voltar">
-          &larr; Voltar
-        </button>
+        {/* Usando Link nativo do React Router */}
+        <Link to="/acervo" className="btn-voltar">
+          &larr; Voltar ao Acervo
+        </Link>
 
         <main className="obra-detalhes-container">
-          
           <section className="obra-imagem-container">
             {obra.coverImage ? (
               <img 
@@ -58,7 +55,6 @@ export default function ObraDetalhes() {
             ) : (
               <div className="imagem-placeholder">Imagem indisponível</div>
             )}
-            {/* Espaço para futuras miniaturas (thumbnails) como na imagem */}
           </section>
 
           <section className="obra-info-container">
@@ -87,7 +83,6 @@ export default function ObraDetalhes() {
               <p><strong>descrição:</strong> {obra.description}</p>
             )}
           </section>
-
         </main>
       </Container>
     </Layout>
