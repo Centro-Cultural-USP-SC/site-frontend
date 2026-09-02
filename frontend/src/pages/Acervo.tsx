@@ -3,7 +3,7 @@ import PageHeader from "../components/PageHeader";
 import Layout from "../components/Layout";
 import Container from "../components/Container";
 
-import destaque from "../assets/pinturas/resignacao.jpg";
+import destaque from "../assets/acervo/home.png";
 import pintura from "../assets/acervo/sem_titulo.jpg";
 import desenho from "../assets/acervo/obestiario.jpg";
 import gravura from "../assets/acervo/partonocortico.jpg";

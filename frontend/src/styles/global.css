@@ -324,36 +324,13 @@ a {
 
 .horizontal-scroll {
   display: flex;
-
+  align-items: flex-start; 
   gap: 2rem;
-
   overflow-x: auto;
-
   scrollbar-width: none;
-
   padding-bottom: 1rem;
-
   cursor: grab;
-
   scroll-snap-type: x mandatory;
-}
-
-.horizontal-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-.horizontal-scroll {
-  display: flex;
-
-  gap: 2rem;
-
-  overflow-x: auto;
-
-  scrollbar-width: none;
-
-  cursor: grab;
-
-  padding-bottom: 1rem;
 }
 
 .horizontal-scroll::-webkit-scrollbar {
@@ -509,21 +486,15 @@ a {
 .obra-card:hover {
   transform: translateY(-4px);
 }
-
-/* Container da imagem do ObraCard */
 .obra-card-image {
   width: 100%;
-  height: 220px; /* Define a altura padrão fixa para todas as obras */
   overflow: hidden;
-  background-color: #f0f0f0; /* Fundo suave enquanto a imagem carrega */
+  background-color: #f0f0f0; 
 }
 
-/* Imagem dentro do container */
 .obra-card-image img {
   width: 100%;
-  height: 100%;
-  object-fit: cover; /* Recorta suavemente para preencher o quadro sem esticar */
-  object-position: center; /* Mantém o centro da arte visível */
+  height: auto;
   display: block;
 }
 
@@ -540,6 +511,36 @@ a {
   margin: 0;
   font-size: 0.9rem;
   color: #666;
+}
+
+/* ==============================================
+   HOME: ROLAGEM HORIZONTAL (ALTURA FIXA, LARGURA DINÂMICA)
+   ============================================== */
+
+/* 1. Ajusta os cards dentro da rolagem horizontal */
+.horizontal-scroll .obra-card {
+  flex: 0 0 auto; /* Impede que o flexbox esmague ou estique o card */
+  width: auto;    /* A largura total do card vai seguir o tamanho natural da imagem */
+}
+
+/* 2. Trava a altura do container da imagem na Home */
+.horizontal-scroll .obra-card-image {
+  height: 260px;  /* Todas as imagens na Home terão EXATAMENTE essa altura */
+  width: auto;    /* A largura se ajusta automaticamente para não cortar */
+  background: transparent;
+}
+
+/* 3. Faz a imagem preencher a altura sem perder a proporção */
+.horizontal-scroll .obra-card-image img {
+  height: 100%;   /* Preenche os 260px de altura */
+  width: auto;    /* O navegador calcula a largura exata da pintura original */
+  display: block;
+  object-fit: contain;
+}
+
+/* 4. Garante que textos longos não quebrem o card em obras muito estreitas */
+.horizontal-scroll .obra-card-content {
+  max-width: 320px; /* Limite suave para o texto da obra */
 }
 
 /* PAGINA HOME ACERVO */
@@ -606,25 +607,16 @@ a {
     color:#111;
 
 }
-
-.categoria-imagem{
-
-    aspect-ratio:4/3;
-
-    overflow:hidden;
-
+.categoria-imagem {
+    width: 100%;
+    overflow: hidden;
 }
 
-.categoria-imagem img{
-
-    width:100%;
-    height:100%;
-
-    object-fit:cover;
-
+.categoria-imagem img {
+    width: 100%;
+    height: auto; 
+    display: block;
 }
-
-/* Hover editorial */
 
 .categoria-card:hover img{
 
