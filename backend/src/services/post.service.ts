@@ -9,6 +9,8 @@ interface CreatePostInput {
   coverImage?: string;
   published?: boolean;
   authorId: number;
+  startDate?: Date; 
+  endDate?: Date;
 }
 
 class PostService {
@@ -44,6 +46,8 @@ class PostService {
     content: string;
     category: "EXPOSICAO" | "ACERVO";
     published: boolean;
+    startDate?: Date; 
+    endDate?: Date;
   }>) {
     return prisma.post.update({
       where: { id },

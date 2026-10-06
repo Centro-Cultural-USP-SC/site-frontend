@@ -12,6 +12,8 @@ class PostController {
         category,
         coverImage,
         published,
+        startDate, // <-- NOVO
+        endDate,   // <-- NOVO
       } = req.body;
 
       const post = await postService.create({
@@ -22,7 +24,9 @@ class PostController {
         category,
         coverImage,
         published,
-        authorId:  (req as any).user.userId,
+        startDate: startDate ? new Date(startDate) : undefined, // <-- NOVO
+        endDate: endDate ? new Date(endDate) : undefined,       // <-- NOVO
+        authorId: (req as any).user.userId,
       });
 
       return res.status(201).json(post);
@@ -58,7 +62,13 @@ class PostController {
   async update(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
-      const post = await postService.update(id, req.body);
+      const { startDate, endDate, ...rest } = req.body;
+
+      const post = await postService.update(id, {
+        ...rest,
+        startDate: startDate ? new Date(startDate) : undefined, // <-- NOVO
+        endDate: endDate ? new Date(endDate) : undefined,       // <-- NOVO
+      });
       
       return res.json(post);
     } catch (error) {
@@ -79,7 +89,6 @@ class PostController {
         message: "Error deleting post",
       });
     }
-
   }
 
   async getExposicoes(req: Request, res: Response) {
@@ -93,7 +102,6 @@ class PostController {
 
     return res.json(posts);
   }
-
 }
 
 export default new PostController();
